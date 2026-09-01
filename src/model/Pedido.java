@@ -19,15 +19,15 @@ public abstract class Pedido {
         return distanciaKm;
     }
     public void mostrarResumen() {
-        System.out.println("ID Pedido: " + idPedido);
+        System.out.println("ID del pedido: " + idPedido);
         System.out.println("Direccion de entrega: " + direccionEntrega);
         System.out.println("Distancia: " + distanciaKm + " km");
     }
-    public abstract int calcularTiempoEntrega();
     public void asignarRepartidor() {
-        System.out.println("Asignando repartidor...");
+        System.out.println("Asignando repartidor automaticamente...");
     }
-    public void asignarRepartidor(String nombreRepartidor) {
-        System.out.println("Repartidor: " + nombreRepartidor);
+    public void asignarRepartidor(String nombre) {
+        System.out.println("Repartidor asignado manualmente: " + nombre);
     }
+    public abstract double calcularTiempoEntrega();
 }
