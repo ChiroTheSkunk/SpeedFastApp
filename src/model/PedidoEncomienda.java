@@ -1,31 +1,41 @@
 package model;
 
-public class PedidoEncomienda extends Pedido implements Despachable, Cancelable, Rastreable {
-    public PedidoEncomienda(int idPedido, String direccionEntrega, double distanciaKm) {
+import interfaces.Cancelable;
+import interfaces.Despachable;
+import interfaces.Rastreable;
+
+public class PedidoEncomienda extends Pedido
+        implements Despachable, Cancelable, Rastreable {
+    private String tipoEncomienda;
+    public PedidoEncomienda(int idPedido, String direccionEntrega,
+                            double distanciaKm, String tipoEncomienda) {
+
         super(idPedido, direccionEntrega, distanciaKm);
+        this.tipoEncomienda = tipoEncomienda;
     }
     @Override
-    public void asignarRepartidor() {
-        System.out.println("Pedido de encomienda: asignando repartidor disponible.");
-    }
-    @Override
-    public void asignarRepartidor(String nombre) {
-        System.out.println("Pedido de encomienda asignado al repartidor: " + nombre);
-    }
-    @Override
-    public double calcularTiempoEntrega() {
-        return getDistanciaKm() * 4;
+    public int calcularTiempoEntrega() {
+        return (int) (distanciaKm * 4) + 20;
     }
     @Override
     public void despachar() {
-        System.out.println("Encomienda despachada.");
+        System.out.println("Encomienda despachada. Tipo: " + tipoEncomienda);
     }
     @Override
     public void cancelar() {
-        System.out.println("Encomienda cancelada.");
+        System.out.println("Encomienda #" + idPedido + " cancelada.");
     }
     @Override
-    public void verHistorial() {
-        System.out.println("Historial de la encomienda #" + getIdPedido());
+    public void rastrear() {
+        System.out.println("Rastreando encomienda #" + idPedido);
+    }
+    @Override
+    public void mostrarResumen() {
+        System.out.println(
+                "Pedido Encomienda #" + idPedido +
+                        " | Tipo: " + tipoEncomienda +
+                        " | Direccion: " + direccionEntrega +
+                        " | Distancia: " + distanciaKm + " km"
+        );
     }
 }

@@ -1,33 +1,40 @@
 package model;
 
-public class PedidoComida extends Pedido implements Despachable, Cancelable, Rastreable {
-    public PedidoComida(int idPedido, String direccionEntrega, double distanciaKm) {
+import interfaces.Cancelable;
+import interfaces.Despachable;
+import interfaces.Rastreable;
+
+public class PedidoComida extends Pedido
+        implements Despachable, Cancelable, Rastreable {
+    private String restaurante;
+    public PedidoComida(int idPedido, String direccionEntrega,
+                        double distanciaKm, String restaurante) {
         super(idPedido, direccionEntrega, distanciaKm);
+        this.restaurante = restaurante;
     }
     @Override
-    public void asignarRepartidor() {
-        System.out.println("Pedido de comida: se requiere repartidor con mochila termica.");
-    }
-    @Override
-    public void asignarRepartidor(String nombre) {
-        System.out.println("Pedido de comida asignado al repartidor: " + nombre);
-        System.out.println("Verificando mochila termica...");
-        System.out.println("Mochila termica confirmada.");
-    }
-    @Override
-    public double calcularTiempoEntrega() {
-        return getDistanciaKm() * 5;
+    public int calcularTiempoEntrega() {
+        return (int) (distanciaKm * 5) + 15;
     }
     @Override
     public void despachar() {
-        System.out.println("Pedido de comida despachado.");
+        System.out.println("Pedido de comida despachado desde " + restaurante);
     }
     @Override
     public void cancelar() {
-        System.out.println("Pedido de comida cancelado.");
+        System.out.println("Pedido de comida #" + idPedido + " cancelado.");
     }
     @Override
-    public void verHistorial() {
-        System.out.println("Historial del pedido de comida #" + getIdPedido());
+    public void rastrear() {
+        System.out.println("Rastreando pedido de comida #" + idPedido);
+    }
+    @Override
+    public void mostrarResumen() {
+        System.out.println(
+                "Pedido Comida #" + idPedido +
+                        " | Restaurante: " + restaurante +
+                        " | Dirección: " + direccionEntrega +
+                        " | Distancia: " + distanciaKm + " km"
+        );
     }
 }
