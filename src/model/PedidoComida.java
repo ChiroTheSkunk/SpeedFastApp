@@ -33,7 +33,7 @@ public class PedidoComida extends Pedido
         System.out.println(
                 "Pedido Comida #" + idPedido +
                         " | Restaurante: " + restaurante +
-                        " | Dirección: " + direccionEntrega +
+                        " | Direccion: " + direccionEntrega +
                         " | Distancia: " + distanciaKm + " km"
         );
     }

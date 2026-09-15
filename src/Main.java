@@ -3,22 +3,22 @@ import model.PedidoComida;
 import model.PedidoEncomienda;
 import model.PedidoExpress;
 import model.Repartidor;
-
-import java.util.Arrays;
-import java.util.List;
+import model.ZonaDeCarga;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 public class Main {
     public static void main(String[] args) {
-        // pedidos repartidor 1
-        List<Pedido> pedidosCarlos = Arrays.asList(
+        ZonaDeCarga zonaDeCarga = new ZonaDeCarga();
+        // Agregar pedidos a la zona de carga
+        zonaDeCarga.agregarPedido(
                 new PedidoComida(
                         1,
                         "Av. Providencia 123",
                         4.5,
                         "Restaurant El Buen Sabor"
-                ),
+                )
+        );
+        zonaDeCarga.agregarPedido(
                 new PedidoExpress(
                         2,
                         "Av. Apoquindo 456",
@@ -26,14 +26,15 @@ public class Main {
                         "Supermercado Central"
                 )
         );
-        // pedidos repartidor 2
-        List<Pedido> pedidosAna = Arrays.asList(
+        zonaDeCarga.agregarPedido(
                 new PedidoEncomienda(
                         3,
                         "Calle Los Leones 789",
                         6.0,
                         "Documentos"
-                ),
+                )
+        );
+        zonaDeCarga.agregarPedido(
                 new PedidoComida(
                         4,
                         "Av. Irarrazaval 321",
@@ -41,14 +42,15 @@ public class Main {
                         "Pizza Express"
                 )
         );
-        // pedidos repartidor 3
-        List<Pedido> pedidosLuis = Arrays.asList(
+        zonaDeCarga.agregarPedido(
                 new PedidoExpress(
                         5,
                         "Calle Macul 555",
                         5.5,
                         "Farmacia Salud"
-                ),
+                )
+        );
+        zonaDeCarga.agregarPedido(
                 new PedidoEncomienda(
                         6,
                         "Av. Vicuña Mackenna 999",
@@ -56,14 +58,14 @@ public class Main {
                         "Paquete"
                 )
         );
-        // crear repartidores
+        // Crear repartidores
         Repartidor repartidorCarlos =
-                new Repartidor("Carlos", pedidosCarlos);
+                new Repartidor("Carlos", zonaDeCarga);
         Repartidor repartidorAna =
-                new Repartidor("Ana", pedidosAna);
+                new Repartidor("Ana", zonaDeCarga);
         Repartidor repartidorLuis =
-                new Repartidor("Luis", pedidosLuis);
-        // crear executor service
+                new Repartidor("Luis", zonaDeCarga);
+        // Crear ExecutorService con 3 hilos
         ExecutorService executor =
                 Executors.newFixedThreadPool(3);
         System.out.println("====================================");
@@ -72,7 +74,7 @@ public class Main {
         System.out.println(
                 "Iniciando entregas simultaneas..."
         );
-        // ejec. concurrente
+        // Ejecutar repartidores en paralelo
         executor.submit(repartidorCarlos);
         executor.submit(repartidorAna);
         executor.submit(repartidorLuis);
@@ -85,7 +87,7 @@ public class Main {
                     "\n===================================="
             );
             System.out.println(
-                    "Todas las entregas fueron completadas."
+                    "Todos los pedidos han sido entregados correctamente"
             );
             System.out.println(
                     "===================================="

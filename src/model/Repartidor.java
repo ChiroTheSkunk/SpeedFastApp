@@ -1,32 +1,39 @@
 package model;
 
-import java.util.List;
 import java.util.Random;
 
 public class Repartidor implements Runnable {
     private String nombre;
-    private List<Pedido> pedidos;
+    private ZonaDeCarga zonaDeCarga;
     private Random random = new Random();
-    public Repartidor(String nombre, List<Pedido> pedidos) {
+    public Repartidor(String nombre, ZonaDeCarga zonaDeCarga) {
         this.nombre = nombre;
-        this.pedidos = pedidos;
+        this.zonaDeCarga = zonaDeCarga;
     }
     @Override
     public void run() {
         System.out.println(
                 "\n[" + nombre + "] comenzo su jornada."
         );
-        for (Pedido pedido : pedidos) {
+        while (true) {
+            Pedido pedido = zonaDeCarga.retirarPedido();
+            if (pedido == null) {
+                break;
+            }
+            pedido.setEstado(EstadoPedido.EN_REPARTO);
             System.out.println(
-                    "[" + nombre + "] recibio el pedido #"
-                            + pedido.getIdPedido()
+                    "[" + nombre + "] retiro el pedido #" +
+                            pedido.getIdPedido() +
+                            " | Estado: " +
+                            pedido.getEstado()
             );
             pedido.mostrarResumen();
             System.out.println(
-                    "[" + nombre + "] se dirige a entregar el pedido #"
-                            + pedido.getIdPedido()
+                    "[" + nombre + "] se dirige a entregar el pedido #" +
+                            pedido.getIdPedido()
             );
             try {
+
                 int tiempoEspera = 1000 + random.nextInt(3000);
                 Thread.sleep(tiempoEspera);
             } catch (InterruptedException e) {
@@ -36,14 +43,17 @@ public class Repartidor implements Runnable {
                 Thread.currentThread().interrupt();
                 return;
             }
+            pedido.setEstado(EstadoPedido.ENTREGADO);
             System.out.println(
-                    "[" + nombre + "] entrego correctamente el pedido #"
-                            + pedido.getIdPedido()
+                    "[" + nombre + "] entrego correctamente el pedido #" +
+                            pedido.getIdPedido() +
+                            " | Estado: " +
+                            pedido.getEstado()
             );
             System.out.println(
-                    "[" + nombre + "] Tiempo estimado de entrega: "
-                            + pedido.calcularTiempoEntrega()
-                            + " minutos."
+                    "[" + nombre + "] Tiempo estimado de entrega: " +
+                            pedido.calcularTiempoEntrega() +
+                            " minutos."
             );
             System.out.println("-----------------------------------");
         }
