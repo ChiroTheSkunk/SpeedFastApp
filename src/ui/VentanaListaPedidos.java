@@ -1,37 +1,60 @@
 package ui;
 
+import dao.PedidoDAO;
+import model.Pedido;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import model.Pedido;
+import java.util.List;
 
 public class VentanaListaPedidos extends JFrame {
-    private JTable tabla;
-    private DefaultTableModel modelo;
+    private final DefaultTableModel modelo;
+    private final PedidoDAO pedidoDAO = new PedidoDAO();
+
     public VentanaListaPedidos() {
         setTitle("Lista de Pedidos - SpeedFast");
-        setSize(650, 350);
+        setSize(700, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        modelo = new DefaultTableModel();
-        modelo.addColumn("ID");
-        modelo.addColumn("Direccion");
-        modelo.addColumn("Distancia (km)");
-        modelo.addColumn("Tipo");
-        tabla = new JTable(modelo);
-        JScrollPane scroll = new JScrollPane(tabla);
-        add(scroll, BorderLayout.CENTER);
+
+        modelo = new DefaultTableModel(
+                new Object[]{"ID", "Direccion", "Tipo", "Estado"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable tabla = new JTable(modelo);
+        add(new JScrollPane(tabla), BorderLayout.CENTER);
+
+        JButton btnActualizar = new JButton("Actualizar");
+        btnActualizar.addActionListener(e -> cargarPedidos());
+
+        JPanel panelInferior = new JPanel();
+        panelInferior.add(btnActualizar);
+        add(panelInferior, BorderLayout.SOUTH);
+
         cargarPedidos();
     }
+
     private void cargarPedidos() {
         modelo.setRowCount(0);
-        for (Pedido pedido : VentanaPrincipal.listaPedidos) {
-            String tipo = pedido.getClass().getSimpleName();
+
+        List<Pedido> pedidos = pedidoDAO.listarTodos();
+
+        for (Pedido pedido : pedidos) {
+            String tipo = pedido.getClass().getSimpleName()
+                    .replace("Pedido", "")
+                    .toUpperCase();
+
             modelo.addRow(new Object[]{
                     pedido.getIdPedido(),
                     pedido.getDireccionEntrega(),
-                    pedido.getDistanciaKm(),
-                    tipo
+                    tipo,
+                    pedido.getEstado()
             });
         }
     }

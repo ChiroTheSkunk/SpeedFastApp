@@ -1,179 +1,61 @@
-# SpeedFastApp
+# SpeedFastApp - Semana 7
 
-SpeedFastApp es una aplicacion de escritorio desarrollada en Java Swing para gestionar pedidos de entrega. El proyecto modela distintos tipos de pedidos, permite registrarlos desde una interfaz grafica, listarlos en una tabla y define la logica base para simular entregas mediante repartidores.
+Proyecto SpeedFast adaptado para la actividad de JDBC y MySQL.
 
-El codigo esta organizado como una aplicacion Java simple, sin dependencias externas ni framework de construccion. Puede abrirse directamente en IntelliJ IDEA o compilarse desde terminal con `javac`.
+## 1. Crear la base de datos
 
-## Caracteristicas principales
+Abrir MySQL Workbench y ejecutar:
 
-- Registro de pedidos con ID, direccion, distancia y tipo de servicio.
-- Soporte para tres tipos de pedidos:
-  - `PedidoComida`
-  - `PedidoEncomienda`
-  - `PedidoExpress`
-- Listado de pedidos registrados en una tabla Swing.
-- Estados de pedido mediante `EstadoPedido`: `PENDIENTE`, `EN_REPARTO` y `ENTREGADO`.
-- Modelo orientado a objetos con herencia, clases abstractas e interfaces.
-- Logica de repartidores implementada con `Runnable` para simular entregas concurrentes.
-- Zona de carga sincronizada para retirar pedidos pendientes de forma segura entre hilos.
+`sql/speedfast_db.sql`
 
-## Tecnologias utilizadas
+Esto crea la base `speedfast_db` y las tablas `repartidor`, `pedido` y `entrega`.
 
-- Java
-- Java Swing
-- Programacion orientada a objetos
-- Hilos con `Runnable`
-- Colecciones de Java (`List`, `ArrayList`, `LinkedList`)
+## 2. Configurar MySQL en Java
 
-## Estructura del proyecto
+Abrir:
 
-```text
-SpeedFastApp/
-|-- src/
-|   |-- interfaces/
-|   |   |-- Cancelable.java
-|   |   |-- Despachable.java
-|   |   `-- Rastreable.java
-|   |-- model/
-|   |   |-- EstadoPedido.java
-|   |   |-- Pedido.java
-|   |   |-- PedidoComida.java
-|   |   |-- PedidoEncomienda.java
-|   |   |-- PedidoExpress.java
-|   |   |-- Repartidor.java
-|   |   `-- ZonaDeCarga.java
-|   `-- ui/
-|       |-- Main.java
-|       |-- VentanaPrincipal.java
-|       |-- VentanaRegistroPedido.java
-|       `-- VentanaListaPedidos.java
-|-- SpeedFastApp.iml
-|-- .gitignore
-`-- README.md
-```
+`src/dao/ConexionDB.java`
 
-## Como funciona
+y cambiar:
 
-La aplicacion inicia desde `ui.Main`, que crea la ventana principal usando `SwingUtilities.invokeLater` para ejecutar la interfaz grafica en el hilo adecuado de Swing.
+`PASSWORD = "tu_contraseña";`
 
-Desde la ventana principal se puede:
+por la contraseña real del usuario `root` de MySQL.
 
-1. Registrar un pedido.
-2. Listar los pedidos registrados.
-3. Iniciar una entrega mediante una confirmacion visual.
+La conexión utilizada es:
 
-Los pedidos registrados se guardan en memoria dentro de `VentanaPrincipal.listaPedidos`, una lista compartida por las ventanas de la aplicacion. Esto significa que los datos existen solo mientras la aplicacion esta abierta; al cerrarla, los pedidos se pierden.
+`jdbc:mysql://localhost:3306/speedfast_db`
 
-### Registro de pedidos
+## 3. Abrir en IntelliJ IDEA
 
-`VentanaRegistroPedido` muestra un formulario con los siguientes campos:
+Abrir la carpeta del proyecto. IntelliJ reconocerá `pom.xml` como proyecto Maven y descargará automáticamente MySQL Connector/J.
 
-- ID del pedido
-- Direccion de entrega
-- Distancia en kilometros
-- Tipo de pedido
+Ejecutar:
 
-Segun el tipo seleccionado, se crea una instancia concreta:
+`src/ui/Main.java`
 
-- `Comida` crea un `PedidoComida`
-- `Encomienda` crea un `PedidoEncomienda`
-- `Express` crea un `PedidoExpress`
+## 4. Funcionalidades de la semana 7
 
-Cada pedido inicia con estado `PENDIENTE`.
+- Registrar pedidos directamente en MySQL.
+- Consultar pedidos desde MySQL mediante `JTable`.
+- Registrar repartidores directamente en MySQL.
+- Consultar repartidores desde MySQL.
+- `PedidoDAO`, `RepartidorDAO` y `EntregaDAO`.
+- Uso de `PreparedStatement`.
+- Uso de `ResultSet`.
+- Manejo de `SQLException`.
+- Cierre automático de Connection, PreparedStatement y ResultSet mediante try-with-resources.
+- Clase `ConexionDB` para centralizar la conexión.
 
-### Listado de pedidos
+## Nota sobre distancia
 
-`VentanaListaPedidos` lee la lista compartida de pedidos y los muestra en una tabla con:
+El modelo de base de datos entregado en la actividad no contiene una columna para `distanciaKm`. Por eso la distancia continúa formando parte del modelo Java, pero no se almacena en la tabla `pedido`. La JTable de pedidos que carga desde MySQL muestra solamente los campos persistidos por el modelo SQL: ID, dirección, tipo y estado.
 
-- ID
-- Direccion
-- Distancia
-- Tipo de pedido
+## Entrega
 
-### Modelo de pedidos
-
-La clase abstracta `Pedido` contiene los datos comunes:
-
-- `idPedido`
-- `direccionEntrega`
-- `distanciaKm`
-- `estado`
-
-Tambien declara el metodo abstracto `calcularTiempoEntrega()`, que cada subtipo implementa con su propia formula:
-
-| Tipo | Formula |
-| --- | --- |
-| Comida | `distanciaKm * 5 + 15` |
-| Encomienda | `distanciaKm * 4 + 20` |
-| Express | `distanciaKm * 3 + 10` |
-
-### Repartidores y zona de carga
-
-El paquete `model` incluye una simulacion de entregas basada en hilos:
-
-- `ZonaDeCarga` mantiene una lista de pedidos y permite agregar o retirar pedidos pendientes.
-- Sus metodos principales son `synchronized`, por lo que estan preparados para usarse desde varios hilos.
-- `Repartidor` implementa `Runnable`, retira pedidos pendientes, cambia su estado a `EN_REPARTO`, simula un tiempo de entrega y finalmente marca el pedido como `ENTREGADO`.
-
-Actualmente, la interfaz grafica registra y lista pedidos. La accion "Asignar repartidor / Iniciar entrega" muestra una confirmacion, pero no ejecuta todavia la simulacion de `Repartidor` y `ZonaDeCarga`.
-
-## Requisitos
-
-- JDK instalado
-- IntelliJ IDEA, Eclipse, NetBeans o cualquier editor compatible con Java
-
-Se recomienda usar Java 8 o superior.
-
-## Ejecucion desde IntelliJ IDEA
-
-1. Abrir el proyecto en IntelliJ IDEA.
-2. Verificar que `src` este marcado como carpeta de codigo fuente.
-3. Abrir `src/ui/Main.java`.
-4. Ejecutar el metodo `main`.
-
-## Ejecucion desde terminal
-
-Desde la raiz del proyecto:
-
-```bash
-javac -d out/production/SpeedFastApp src/interfaces/*.java src/model/*.java src/ui/*.java
-java -cp out/production/SpeedFastApp ui.Main
-```
-
-En PowerShell, los mismos comandos pueden ejecutarse desde:
-
-```powershell
-C:\Users\matia\IdeaProjects\SpeedFastApp
-```
-
-## Conceptos aplicados
-
-- Encapsulamiento de datos mediante clases del modelo.
-- Herencia con la clase abstracta `Pedido`.
-- Polimorfismo en los distintos tipos de pedido.
-- Interfaces para representar capacidades: `Despachable`, `Cancelable` y `Rastreable`.
-- Separacion basica entre modelo (`model`) e interfaz grafica (`ui`).
-- Manejo de eventos con Swing.
-- Sincronizacion de acceso a datos compartidos en `ZonaDeCarga`.
-
-## Limitaciones actuales
-
-- Los pedidos se almacenan solo en memoria.
-- No existe persistencia en archivos ni base de datos.
-- La tabla de pedidos no muestra el estado actual del pedido.
-- El boton de entrega en la interfaz no esta conectado todavia con la simulacion de repartidores.
-- No hay validacion de IDs duplicados.
-- No hay pruebas automatizadas configuradas.
-
-## Posibles mejoras
-
-- Conectar la ventana principal con `ZonaDeCarga` y `Repartidor`.
-- Mostrar y actualizar el estado de cada pedido en la tabla.
-- Agregar persistencia con archivos, SQLite u otra base de datos.
-- Implementar busqueda, filtros y eliminacion de pedidos.
-- Validar IDs duplicados y distancias negativas.
-- Agregar pruebas unitarias para el modelo.
-
-## Autor
-
-Proyecto desarrollado como aplicacion academica/practica para gestionar pedidos y aplicar conceptos de programacion orientada a objetos en Java.
+Antes de subir el proyecto a GitHub, comprobar que:
+1. MySQL esté ejecutándose.
+2. `speedfast_db` exista.
+3. La contraseña en `ConexionDB.java` sea correcta.
+4. Maven haya descargado `mysql-connector-j`.
+5. `Main.java` compile y ejecute.

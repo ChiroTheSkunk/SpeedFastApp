@@ -1,18 +1,18 @@
 package ui;
-
-import javax.swing.*;
-import java.awt.*;
+import dao.PedidoDAO;
 import model.Pedido;
 import model.PedidoComida;
 import model.PedidoEncomienda;
 import model.PedidoExpress;
-
+import javax.swing.*;
+import java.awt.*;
 public class VentanaRegistroPedido extends JFrame {
     private JTextField txtId;
     private JTextField txtDireccion;
     private JTextField txtDistancia;
     private JComboBox<String> comboTipo;
     private JButton btnGuardar;
+    private final PedidoDAO pedidoDAO = new PedidoDAO();
     public VentanaRegistroPedido() {
         setTitle("Registrar Pedido - SpeedFast");
         setSize(450, 300);
@@ -29,12 +29,9 @@ public class VentanaRegistroPedido extends JFrame {
         txtDistancia = new JTextField();
         panel.add(txtDistancia);
         panel.add(new JLabel("Tipo:"));
-        comboTipo = new JComboBox<>();
-        comboTipo.addItem("Comida");
-        comboTipo.addItem("Encomienda");
-        comboTipo.addItem("Express");
+        comboTipo = new JComboBox<>(new String[]{"Comida", "Encomienda", "Express"});
         panel.add(comboTipo);
-        btnGuardar = new JButton("Guardar");
+        btnGuardar = new JButton("Guardar en BD");
         panel.add(new JLabel(""));
         panel.add(btnGuardar);
         add(panel);
@@ -45,6 +42,7 @@ public class VentanaRegistroPedido extends JFrame {
             if (txtId.getText().trim().isEmpty()
                     || txtDireccion.getText().trim().isEmpty()
                     || txtDistancia.getText().trim().isEmpty()) {
+
                 JOptionPane.showMessageDialog(
                         this,
                         "Complete todos los campos.",
@@ -55,45 +53,37 @@ public class VentanaRegistroPedido extends JFrame {
             }
             int id = Integer.parseInt(txtId.getText().trim());
             String direccion = txtDireccion.getText().trim();
-            double distancia = Double.parseDouble(
-                    txtDistancia.getText().trim()
-            );
-
+            double distancia = Double.parseDouble(txtDistancia.getText().trim());
             String tipo = comboTipo.getSelectedItem().toString();
             Pedido pedido;
             if (tipo.equals("Comida")) {
-                pedido = new PedidoComida(
-                        id,
-                        direccion,
-                        distancia,
-                        "Pendiente"
-                );
+                pedido = new PedidoComida(id, direccion, distancia, "No especificado");
             } else if (tipo.equals("Encomienda")) {
-                pedido = new PedidoEncomienda(
-                        id,
-                        direccion,
-                        distancia,
-                        "Pendiente"
-                );
+                pedido = new PedidoEncomienda(id, direccion, distancia, "No especificado");
             } else {
-                pedido = new PedidoExpress(
-                        id,
-                        direccion,
-                        distancia,
-                        "Pendiente"
+                pedido = new PedidoExpress(id, direccion, distancia, "No especificado");
+            }
+            if (pedidoDAO.guardar(pedido)) {
+                VentanaPrincipal.listaPedidos.add(pedido);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Pedido guardado correctamente en la base de datos.",
+                        "SpeedFast",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                txtId.setText("");
+                txtDireccion.setText("");
+                txtDistancia.setText("");
+                comboTipo.setSelectedIndex(0);
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No se pudo guardar el pedido. Revisa la conexion a MySQL y que el ID no esté repetido.",
+                        "Error de base de datos",
+                        JOptionPane.ERROR_MESSAGE
                 );
             }
-            VentanaPrincipal.listaPedidos.add(pedido);
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Pedido registrado correctamente.",
-                    "SpeedFast",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            txtId.setText("");
-            txtDireccion.setText("");
-            txtDistancia.setText("");
-            comboTipo.setSelectedIndex(0);
+
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(
                     this,
